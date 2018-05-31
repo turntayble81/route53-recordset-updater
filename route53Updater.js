@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const async  = require('async');
 const fs     = require('fs');
 const AWS    = require('aws-sdk');
