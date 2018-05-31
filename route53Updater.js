@@ -25,31 +25,25 @@ async.parallel([
     currentIp       = sanitizeIP(currentIp);
     lastRecordSetIp = sanitizeIP(lastRecordSetIp);
 
-    console.log(`Current IP    : ${currentIp}`);
-    console.log(`Record set IP : ${lastRecordSetIp || 'unknown'}`);
+    log(`Current IP    : ${currentIp}`);
+    log(`Record set IP : ${lastRecordSetIp || 'unknown'}`);
 
     if(currentIp == lastRecordSetIp) {
-        console.log('Record set IP is already up to date');
+        log('Record set IP is already up to date');
     }else {
-        console.log('Updating record set');
+        log('Updating record set');
         updateRecordSet(currentIp, (err) => {
             if(err) {
                 console.error(err);
             }else {
-                console.log('Successfully updated record set');
+                log('Successfully updated record set');
             }
         });
     }
 });
 
-function sanitizeIP(ip) {
-    if(!ip) {
-        return ip;
-    }
-    return ip.replace(/[^0-9.]/g, '');
-}
 function getCurrentIp(cb) {
-    console.log('Determining current IP');
+    log('Determining current IP');
     exec('curl -s ipinfo.io/ip', (err, stdout, stderr) => {
         if(err) {
             return cb(err);
@@ -62,7 +56,7 @@ function getCurrentIp(cb) {
 }
 
 function getLastRecordSetIp(cb) {
-    console.log('Determining last known record set IP');
+    log('Determining last known record set IP');
     fs.stat(IP_FILE, (err, stat) => {
         if(err) {
             if(err.code == 'ENOENT') {
@@ -101,4 +95,15 @@ function updateRecordSet(ip, cb) {
         (next) => route53.changeResourceRecordSets(params, next),
         (next) => fs.writeFile(IP_FILE, ip, next)
     ], cb);
+}
+
+function sanitizeIP(ip) {
+    if(!ip) {
+        return ip;
+    }
+    return ip.replace(/[^0-9.]/g, '');
+}
+
+function log(str) {
+    console.log(`[${new Date().toISOString()}]  ${str}`);
 }
